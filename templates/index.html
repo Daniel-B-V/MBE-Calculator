@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MBE Calculator — Petroleum Engineering</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="brand-icon">⛽</span>
+        <div>
+          <h1 class="brand-title">MBE Calculator</h1>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── TAB BAR ────────────────────────────────────────── -->
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="calculator">🧮 Calculator</button>
+    <button class="tab-btn"        data-tab="graphing">📈 Graphing</button>
+    <button class="tab-btn"        data-tab="parameters">📋 Parameters</button>
+  </nav>
+
+  <!-- ═════════════════════════════════════════════════════=
+       CALCULATOR TAB
+  ═════════════════════════════════════════════════════=
+  -->
+  <section class="tab-panel active" id="tab-calculator">
+    <div class="calc-layout">
+
+      <!-- Main panel (cards shown here) -->
+      <div class="calc-main" id="calc-main">
+        <div class="placeholder-msg">
+          <span class="placeholder-arrow">←</span>
+          Select an equation to begin
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════════════════════════════=
+       GRAPHING TAB
+  ═════════════════════════════════════════════════════=
+  -->
+  <section class="tab-panel" id="tab-graphing">
+    <div class="graph-layout">
+
+      <!-- Controls sidebar -->
+      <aside class="graph-sidebar">
+        <div class="sidebar-block">
+          <p class="sidebar-label">AXIS CONFIGURATION</p>
+          <div class="input-row">
+            <label>X Label</label>
+            <input type="text" id="g-xlabel" value="x" class="txt-input" />
+          </div>
+          <div class="input-row">
+            <label>Y Label</label>
+            <input type="text" id="g-ylabel" value="y" class="txt-input" />
+          </div>
+          <div class="input-row">
+            <label>Slope Symbol</label>
+            <input type="text" id="g-slope-sym" value="m" class="txt-input short" />
+          </div>
+          <div class="input-row">
+            <label>Graph Title</label>
+            <input type="text" id="g-title" value="Oil &amp; Gas Material Balance – Linear Function" class="txt-input" />
+          </div>
+        </div>
+
+        <div class="sidebar-block">
+          <p class="sidebar-label">DATA TABLE  <span class="hint">(x, y) pairs</span></p>
+          <div class="table-header-row">
+            <span>x</span><span>y</span>
+          </div>
+          <div id="graph-rows" class="graph-rows"></div>
+          <div class="graph-row-btns">
+            <button id="btn-add-row"    class="btn-sm accent2">+ Add Row</button>
+            <button id="btn-remove-row" class="btn-sm danger">− Remove</button>
+          </div>
+        </div>
+
+        <button id="btn-plot" class="btn-primary full-width">Plot Graph  📈</button>
+        <div id="slope-display" class="slope-display"></div>
+      </aside>
+
+      <!-- Chart area -->
+      <div class="graph-main">
+        <canvas id="mbe-chart"></canvas>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═════════════════════════════════════════════════════=
+       PARAMETERS TAB
+  ═════════════════════════════════════════════════════=
+  -->
+  <section class="tab-panel" id="tab-parameters">
+    <div class="params-container">
+      <div class="params-header">
+        <h2>Parameters &amp; Units Reference</h2>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="param-search" placeholder="Search symbol, description, or unit…" class="txt-input" />
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Description</th>
+              <th>Unit</th>
+            </tr>
+          </thead>
+          <tbody id="param-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
