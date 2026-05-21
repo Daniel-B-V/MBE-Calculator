@@ -33,17 +33,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // THEME: light/dark toggle with persistence
 function initTheme() {
-  const btn = document.getElementById('theme-toggle');
-  if (!btn) return;
+  const chk = document.getElementById('theme-toggle');
+  if (!chk) return;
 
   const saved = localStorage.getItem('mbe_theme');
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   const initial = saved || (prefersDark ? 'dark' : 'light');
   applyTheme(initial);
 
-  btn.addEventListener('click', () => {
-    const current = document.documentElement.classList.contains('light-theme') ? 'light' : 'dark';
-    const next = current === 'light' ? 'dark' : 'light';
+  // sync checkbox
+  chk.checked = initial === 'light';
+
+  chk.addEventListener('change', () => {
+    const next = chk.checked ? 'light' : 'dark';
     applyTheme(next);
     localStorage.setItem('mbe_theme', next);
   });
@@ -146,16 +148,16 @@ function renderEqCards() {
     const sym = eq.solve_for || (eq.vars && eq.vars[0]) || "?";
     const param = getParam(sym);
     const desc = param ? param.description : "";
+    // detect parenthetical symbol in the original name (e.g. "... (N)")
+    const parenMatch = String(name).match(/\(([^)]+)\)\s*$/);
 
     const card = el("button", { className: "eq-card" });
-    const left = el("div", { className: "card-left" });
-    left.appendChild(el("div", { className: "card-symbol", textContent: sym }));
-    const right = el("div", { className: "card-right" });
-    right.appendChild(el("div", { className: "card-name", textContent: name }));
-    if (desc) right.appendChild(el("div", { className: "card-desc", textContent: desc }));
-
-    card.appendChild(left);
-    card.appendChild(right);
+    const middle = el("div", { className: "card-center" });
+    middle.appendChild(el("div", { className: "card-symbol", textContent: sym }));
+    // display name without numeric prefix (e.g. "1.")
+    middle.appendChild(el("div", { className: "card-name", textContent: stripNumberPrefix(name) }));
+    if (desc) middle.appendChild(el("div", { className: "card-desc", textContent: desc }));
+    card.appendChild(middle);
 
     card.addEventListener("click", () => {
       loadEquation(name);
@@ -165,6 +167,11 @@ function renderEqCards() {
   });
 
   main.appendChild(grid);
+}
+
+function stripNumberPrefix(name) {
+  // Remove patterns like "1.", "2a.", "3b.", etc. at the start of the string
+  return String(name).replace(/^\s*\d+[A-Za-z]*\.\s*/, '');
 }
 
 function loadEquation(name) {
@@ -179,8 +186,8 @@ function loadEquation(name) {
   backWrap.appendChild(backBtn);
   main.appendChild(backWrap);
 
-  // Title
-  const title = el("h2", { className: "eq-title fade-up" }, name);
+  // Title (without numeric prefix)
+  const title = el("h2", { className: "eq-title fade-up" }, stripNumberPrefix(name));
   main.appendChild(title);
 
   // Formula card
