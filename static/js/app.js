@@ -384,7 +384,7 @@ function renderParamTable(data) {
   tbody.innerHTML = "";
   data.forEach(p => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${escHtml(p.symbol)}</td><td>${escHtml(p.description)}</td><td>${escHtml(p.unit)}</td>`;
+    tr.innerHTML = `<td>${escHtml(p.symbol)}<\/td><td>${escHtml(p.description)}<\/td><td>${escHtml(p.unit)}<\/td>`;
     tbody.appendChild(tr);
   });
 }
@@ -404,51 +404,363 @@ function initParamSearch() {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// GRAPHING TAB
+// GRAPHING TAB WITH COMPUTED COLUMNS
 // ════════════════════════════════════════════════════════════════════
 
-const INITIAL_DATA = [[0,8.5],[1,9.25],[2,10],[3,10.75],[4,11.5],[5,12.25],[6,13]];
+// Store column data with operations
+let xColumns = [];  // Array of column objects { id, name, values, operation }
+let yColumns = [];  // Array of column objects { id, name, values, operation }
+let nextColumnId = 1;
+
+// Default operations for new columns
+const DEFAULT_OPERATION = 'add';
 
 function initGraphingTab() {
-  // Seed initial rows
-  INITIAL_DATA.forEach(([x, y]) => addGraphRow(x, y));
+  // Add initial default columns
+  addXColumn();
+  addYColumn();
+  
+  // Set default values for first columns
+  if (xColumns[0]) {
+    xColumns[0].values = [1, 2, 3, 4, 5];
+    const container = document.querySelector(`#x-column-${xColumns[0].id} .column-value-inputs`);
+    if (container) updateColumnInputs(xColumns[0], container);
+  }
+  if (yColumns[0]) {
+    yColumns[0].values = [2, 4, 6, 8, 10];
+    const container = document.querySelector(`#y-column-${yColumns[0].id} .column-value-inputs`);
+    if (container) updateColumnInputs(yColumns[0], container);
+  }
 
-  document.getElementById("btn-add-row").addEventListener("click", () => addGraphRow());
-  document.getElementById("btn-remove-row").addEventListener("click", removeLastRow);
+  document.getElementById("btn-add-x-column").addEventListener("click", () => addXColumn());
+  document.getElementById("btn-add-y-column").addEventListener("click", () => addYColumn());
   document.getElementById("btn-plot").addEventListener("click", plotGraph);
 
   initChart();
 }
 
-function addGraphRow(xv = "", yv = "") {
-  const container = document.getElementById("graph-rows");
-  const row = el("div", { className: "graph-row" });
-  const xe  = el("input", { type: "text", className: "cell-input", value: String(xv), placeholder: "x" });
-  const ye  = el("input", { type: "text", className: "cell-input", value: String(yv), placeholder: "y" });
-  row.appendChild(xe);
-  row.appendChild(ye);
-  container.appendChild(row);
+function addXColumn() {
+  const columnId = nextColumnId++;
+  const column = {
+    id: columnId,
+    name: `X${columnId}`,
+    values: [0, 0, 0, 0, 0],
+    operation: DEFAULT_OPERATION  // Operation to apply from previous column
+  };
+  xColumns.push(column);
+  renderXColumns();
 }
 
-function removeLastRow() {
-  const container = document.getElementById("graph-rows");
-  const rows = container.querySelectorAll(".graph-row");
-  if (rows.length > 0) rows[rows.length - 1].remove();
+function addYColumn() {
+  const columnId = nextColumnId++;
+  const column = {
+    id: columnId,
+    name: `Y${columnId}`,
+    values: [0, 0, 0, 0, 0],
+    operation: DEFAULT_OPERATION  // Operation to apply from previous column
+  };
+  yColumns.push(column);
+  renderYColumns();
 }
 
-function getGraphData() {
-  const rows = document.querySelectorAll("#graph-rows .graph-row");
-  const xs = [], ys = [];
-  rows.forEach(row => {
-    const inputs = row.querySelectorAll("input");
-    const xv = inputs[0]?.value.trim();
-    const yv = inputs[1]?.value.trim();
-    if (xv && yv && !isNaN(+xv) && !isNaN(+yv)) {
-      xs.push(+xv);
-      ys.push(+yv);
+function removeXColumn(columnId) {
+  xColumns = xColumns.filter(col => col.id !== columnId);
+  renderXColumns();
+}
+
+function removeYColumn(columnId) {
+  yColumns = yColumns.filter(col => col.id !== columnId);
+  renderYColumns();
+}
+
+function renderXColumns() {
+  const container = document.getElementById("x-columns-container");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  xColumns.forEach((column, index) => {
+    // Add operation selector before this column (if not the first one)
+    if (index > 0) {
+      const opRow = document.createElement("div");
+      opRow.className = "column-operation-row";
+      
+      const opLabel = document.createElement("div");
+      opLabel.className = "op-label";
+      opLabel.textContent = "↓ Operation ↓";
+      
+      const opSelect = document.createElement("select");
+      opSelect.className = "column-operation-select";
+      opSelect.value = column.operation;
+      opSelect.addEventListener("change", (e) => {
+        column.operation = e.target.value;
+      });
+      
+      [
+        { value: 'add', text: '➕ Add (+)' },
+        { value: 'subtract', text: '➖ Subtract (-)' },
+        { value: 'multiply', text: '✖ Multiply (×)' },
+        { value: 'divide', text: '➗ Divide (÷)' }
+      ].forEach(op => {
+        const opt = document.createElement("option");
+        opt.value = op.value;
+        opt.textContent = op.text;
+        opSelect.appendChild(opt);
+      });
+      
+      opRow.appendChild(opLabel);
+      opRow.appendChild(opSelect);
+      container.appendChild(opRow);
     }
+    
+    const columnDiv = document.createElement("div");
+    columnDiv.className = "column-item";
+    columnDiv.id = `x-column-${column.id}`;
+    
+    // Header with name input and remove button
+    const header = document.createElement("div");
+    header.className = "column-header";
+    
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.className = "column-name-input";
+    nameInput.value = column.name;
+    nameInput.placeholder = "Column name";
+    nameInput.addEventListener("change", (e) => {
+      column.name = e.target.value;
+    });
+    
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "btn-remove-column";
+    removeBtn.innerHTML = "✕";
+    removeBtn.addEventListener("click", () => removeXColumn(column.id));
+    
+    header.appendChild(nameInput);
+    header.appendChild(removeBtn);
+    
+    // Value inputs container
+    const valuesContainer = document.createElement("div");
+    valuesContainer.className = "column-value-inputs";
+    
+    columnDiv.appendChild(header);
+    columnDiv.appendChild(valuesContainer);
+    container.appendChild(columnDiv);
+    
+    updateColumnInputs(column, valuesContainer);
   });
-  return { xs, ys };
+}
+
+function renderYColumns() {
+  const container = document.getElementById("y-columns-container");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  yColumns.forEach((column, index) => {
+    // Add operation selector before this column (if not the first one)
+    if (index > 0) {
+      const opRow = document.createElement("div");
+      opRow.className = "column-operation-row";
+      
+      const opLabel = document.createElement("div");
+      opLabel.className = "op-label";
+      opLabel.textContent = "↓ Operation ↓";
+      
+      const opSelect = document.createElement("select");
+      opSelect.className = "column-operation-select";
+      opSelect.value = column.operation;
+      opSelect.addEventListener("change", (e) => {
+        column.operation = e.target.value;
+      });
+      
+      [
+        { value: 'add', text: '➕ Add (+)' },
+        { value: 'subtract', text: '➖ Subtract (-)' },
+        { value: 'multiply', text: '✖ Multiply (×)' },
+        { value: 'divide', text: '➗ Divide (÷)' }
+      ].forEach(op => {
+        const opt = document.createElement("option");
+        opt.value = op.value;
+        opt.textContent = op.text;
+        opSelect.appendChild(opt);
+      });
+      
+      opRow.appendChild(opLabel);
+      opRow.appendChild(opSelect);
+      container.appendChild(opRow);
+    }
+    
+    const columnDiv = document.createElement("div");
+    columnDiv.className = "column-item";
+    columnDiv.id = `y-column-${column.id}`;
+    
+    // Header with name input and remove button
+    const header = document.createElement("div");
+    header.className = "column-header";
+    
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.className = "column-name-input";
+    nameInput.value = column.name;
+    nameInput.placeholder = "Column name";
+    nameInput.addEventListener("change", (e) => {
+      column.name = e.target.value;
+    });
+    
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "btn-remove-column";
+    removeBtn.innerHTML = "✕";
+    removeBtn.addEventListener("click", () => removeYColumn(column.id));
+    
+    header.appendChild(nameInput);
+    header.appendChild(removeBtn);
+    
+    // Value inputs container
+    const valuesContainer = document.createElement("div");
+    valuesContainer.className = "column-value-inputs";
+    
+    columnDiv.appendChild(header);
+    columnDiv.appendChild(valuesContainer);
+    container.appendChild(columnDiv);
+    
+    updateColumnInputs(column, valuesContainer);
+  });
+}
+
+function updateColumnInputs(column, container) {
+  if (!container) return;
+  container.innerHTML = "";
+  
+  // Create input rows for each value
+  for (let i = 0; i < column.values.length; i++) {
+    const row = document.createElement("div");
+    row.className = "column-row";
+    
+    const label = document.createElement("label");
+    label.textContent = `Row ${i + 1}:`;
+    
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "cell-input";
+    input.value = column.values[i];
+    input.placeholder = "value";
+    
+    input.addEventListener("change", (e) => {
+      let val = parseFloat(e.target.value);
+      if (isNaN(val)) val = 0;
+      column.values[i] = val;
+    });
+    
+    row.appendChild(label);
+    row.appendChild(input);
+    container.appendChild(row);
+  }
+}
+
+function getComputedValues() {
+  // Get operation between X and Y final results
+  const operationSelect = document.getElementById("x-y-operation");
+  const xyOperation = operationSelect ? operationSelect.value : 'add';
+  
+  // Determine max length (assuming all columns have same length for operation)
+  let maxLength = 0;
+  xColumns.forEach(col => { if (col.values.length > maxLength) maxLength = col.values.length; });
+  yColumns.forEach(col => { if (col.values.length > maxLength) maxLength = col.values.length; });
+  
+  // Compute X values by applying operations between columns
+  const computedX = [];
+  for (let i = 0; i < maxLength; i++) {
+    let result = 0;
+    let isFirst = true;
+    
+    for (let j = 0; j < xColumns.length; j++) {
+      const col = xColumns[j];
+      const value = (col.values[i] !== undefined && !isNaN(col.values[i])) ? col.values[i] : 0;
+      
+      if (isFirst) {
+        result = value;
+        isFirst = false;
+      } else {
+        const op = col.operation || 'add';
+        switch(op) {
+          case 'add':
+            result = result + value;
+            break;
+          case 'subtract':
+            result = result - value;
+            break;
+          case 'multiply':
+            result = result * value;
+            break;
+          case 'divide':
+            result = value !== 0 ? result / value : 0;
+            break;
+          default:
+            result = result + value;
+        }
+      }
+    }
+    computedX.push(result);
+  }
+  
+  // Compute Y values by applying operations between columns
+  const computedY = [];
+  for (let i = 0; i < maxLength; i++) {
+    let result = 0;
+    let isFirst = true;
+    
+    for (let j = 0; j < yColumns.length; j++) {
+      const col = yColumns[j];
+      const value = (col.values[i] !== undefined && !isNaN(col.values[i])) ? col.values[i] : 0;
+      
+      if (isFirst) {
+        result = value;
+        isFirst = false;
+      } else {
+        const op = col.operation || 'add';
+        switch(op) {
+          case 'add':
+            result = result + value;
+            break;
+          case 'subtract':
+            result = result - value;
+            break;
+          case 'multiply':
+            result = result * value;
+            break;
+          case 'divide':
+            result = value !== 0 ? result / value : 0;
+            break;
+          default:
+            result = result + value;
+        }
+      }
+    }
+    computedY.push(result);
+  }
+  
+  // Apply operation between final X and Y results
+  const finalY = [];
+  for (let i = 0; i < maxLength; i++) {
+    let finalValue;
+    switch(xyOperation) {
+      case 'add':
+        finalValue = computedX[i] + computedY[i];
+        break;
+      case 'subtract':
+        finalValue = computedX[i] - computedY[i];
+        break;
+      case 'multiply':
+        finalValue = computedX[i] * computedY[i];
+        break;
+      case 'divide':
+        finalValue = computedY[i] !== 0 ? computedX[i] / computedY[i] : 0;
+        break;
+      default:
+        finalValue = computedX[i] + computedY[i];
+    }
+    finalY.push(finalValue);
+  }
+  
+  return { xs: computedX, ys: finalY };
 }
 
 function initChart() {
@@ -480,10 +792,21 @@ function initChart() {
   });
 }
 
+function getOpSymbol(operation) {
+  switch(operation) {
+    case 'add': return '+';
+    case 'subtract': return '-';
+    case 'multiply': return '×';
+    case 'divide': return '÷';
+    default: return '+';
+  }
+}
+
 async function plotGraph() {
-  const { xs, ys } = getGraphData();
+  const { xs, ys } = getComputedValues();
+  
   if (xs.length < 2) {
-    alert("Enter at least 2 valid (x, y) pairs.");
+    alert("Need at least 2 valid data points. Please add more rows to your columns.");
     return;
   }
 
@@ -512,9 +835,28 @@ async function plotGraph() {
     // Build annotation points for labels
     const pointData = xs.map((x, i) => ({ x, y: ys[i] }));
 
+    // Build column info for legend - show operations between columns
+    const xColumnsInfo = xColumns.map((col, idx) => {
+      if (idx === 0) return col.name;
+      const opSymbol = getOpSymbol(col.operation);
+      return `${opSymbol} ${col.name}`;
+    }).join(' ');
+    
+    const yColumnsInfo = yColumns.map((col, idx) => {
+      if (idx === 0) return col.name;
+      const opSymbol = getOpSymbol(col.operation);
+      return `${opSymbol} ${col.name}`;
+    }).join(' ');
+    
+    const operationSelect = document.getElementById("x-y-operation");
+    const operation = operationSelect ? operationSelect.value : 'add';
+    const xyOpSymbol = getOpSymbol(operation);
+    
+    const legendLabel = `y = (${xColumnsInfo || '0'}) ${xyOpSymbol} (${yColumnsInfo || '0'})`;
+
     state.chart.data.datasets = [
       {
-        label: "Data Points",
+        label: legendLabel,
         type: "scatter",
         data: pointData,
         backgroundColor: "#4f8ef7",
@@ -540,8 +882,10 @@ async function plotGraph() {
     // Slope display
     const sd = document.getElementById("slope-display");
     const s12 = data.slope_pts12 !== null ? formatNumber(data.slope_pts12) : "N/A";
-    sd.style.display = "block";
-    sd.textContent   = `${slopeSym} (pts 1–2)  =  ${s12}\n${slopeSym} (best-fit) =  ${formatNumber(data.slope)}\nintercept        =  ${formatNumber(data.intercept)}`;
+    if (sd) {
+      sd.style.display = "block";
+      sd.textContent   = `${slopeSym} (pts 1–2)  =  ${s12}\n${slopeSym} (best-fit) =  ${formatNumber(data.slope)}\nintercept        =  ${formatNumber(data.intercept)}`;
+    }
 
   } catch (err) {
     alert(`Network error: ${err.message}`);

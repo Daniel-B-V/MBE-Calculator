@@ -63,7 +63,7 @@
   </section>
 
   <!-- ═════════════════════════════════════════════════════=
-       GRAPHING TAB
+       GRAPHING TAB WITH COMPUTED COLUMNS
   ═════════════════════════════════════════════════════=
   -->
   <section class="tab-panel" id="tab-graphing">
@@ -91,16 +91,29 @@
           </div>
         </div>
 
+        <!-- X-AXIS COLUMNS SECTION -->
         <div class="sidebar-block">
-          <p class="sidebar-label">DATA TABLE  <span class="hint">(x, y) pairs</span></p>
-          <div class="table-header-row">
-            <span>x</span><span>y</span>
-          </div>
-          <div id="graph-rows" class="graph-rows"></div>
-          <div class="graph-row-btns">
-            <button id="btn-add-row"    class="btn-sm accent2">+ Add Row</button>
-            <button id="btn-remove-row" class="btn-sm danger">− Remove</button>
-          </div>
+          <p class="sidebar-label">X-AXIS COLUMNS <span class="hint">(will be summed)</span></p>
+          <div id="x-columns-container" class="columns-container"></div>
+          <button id="btn-add-x-column" class="btn-sm accent2" style="margin-top: 8px;">+ Add X Column</button>
+        </div>
+
+        <!-- OPERATION SELECTOR BETWEEN X AND Y -->
+        <div class="sidebar-block">
+          <p class="sidebar-label">BETWEEN COLUMNS OPERATION</p>
+          <select id="x-y-operation" class="operation-select">
+            <option value="add">➕ Add (+) - (Sum X) + (Sum Y)</option>
+            <option value="subtract">➖ Subtract (-) - (Sum X) - (Sum Y)</option>
+            <option value="multiply">✖ Multiply (×) - (Sum X) × (Sum Y)</option>
+            <option value="divide">➗ Divide (÷) - (Sum X) ÷ (Sum Y)</option>
+          </select>
+        </div>
+
+        <!-- Y-AXIS COLUMNS SECTION -->
+        <div class="sidebar-block">
+          <p class="sidebar-label">Y-AXIS COLUMNS <span class="hint">(will be summed)</span></p>
+          <div id="y-columns-container" class="columns-container"></div>
+          <button id="btn-add-y-column" class="btn-sm accent2" style="margin-top: 8px;">+ Add Y Column</button>
         </div>
 
         <button id="btn-plot" class="btn-primary full-width">Plot Graph  📈</button>

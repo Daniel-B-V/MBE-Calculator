@@ -232,5 +232,64 @@ def regression():
     })
 
 
+# ─── ADDITIONAL UTILITY ROUTES FOR GRAPHING (optional) ───────────────────────
+@app.route("/api/compute_operation", methods=["POST"])
+def compute_operation():
+    """
+    Compute operation between X and Y columns.
+    Expects JSON: {
+        "x_columns": [[1,2,3], [4,5,6]],  # arrays of column values
+        "y_columns": [[1,2,3], [4,5,6]],
+        "operation": "add" | "subtract" | "multiply" | "divide"
+    }
+    """
+    data = request.get_json()
+    x_columns = data.get("x_columns", [])
+    y_columns = data.get("y_columns", [])
+    operation = data.get("operation", "add")
+    
+    if not x_columns and not y_columns:
+        return jsonify({"error": "At least one X or Y column required"}), 400
+    
+    # Determine max length
+    max_len = 0
+    for col in x_columns + y_columns:
+        if len(col) > max_len:
+            max_len = len(col)
+    
+    # Compute sums for each row
+    result_x = []
+    result_y = []
+    
+    for i in range(max_len):
+        x_sum = 0
+        for col in x_columns:
+            x_sum += col[i] if i < len(col) else 0
+        
+        y_sum = 0
+        for col in y_columns:
+            y_sum += col[i] if i < len(col) else 0
+        
+        # Apply operation
+        if operation == "add":
+            result = x_sum + y_sum
+        elif operation == "subtract":
+            result = x_sum - y_sum
+        elif operation == "multiply":
+            result = x_sum * y_sum
+        elif operation == "divide":
+            result = x_sum / y_sum if y_sum != 0 else 0
+        else:
+            result = x_sum + y_sum
+        
+        result_x.append(x_sum)
+        result_y.append(result)
+    
+    return jsonify({
+        "x": result_x,
+        "y": result_y
+    })
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
