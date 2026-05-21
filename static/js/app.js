@@ -770,30 +770,7 @@ function getComputedValues() {
     computedY.push(result);
   }
   
-  // Apply operation between final X and Y results
-  const finalY = [];
-  for (let i = 0; i < maxLength; i++) {
-    let finalValue;
-    switch(xyOperation) {
-      case 'add':
-        finalValue = computedX[i] + computedY[i];
-        break;
-      case 'subtract':
-        finalValue = computedX[i] - computedY[i];
-        break;
-      case 'multiply':
-        finalValue = computedX[i] * computedY[i];
-        break;
-      case 'divide':
-        finalValue = computedY[i] !== 0 ? computedX[i] / computedY[i] : 0;
-        break;
-      default:
-        finalValue = computedX[i] + computedY[i];
-    }
-    finalY.push(finalValue);
-  }
-  
-  return { xs: computedX, ys: finalY };
+  return { xs: computedX, ys: computedY };
 }
 
 function initChart() {
