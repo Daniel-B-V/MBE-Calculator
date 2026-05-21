@@ -24,10 +24,68 @@ const API = {
 // ─── BOOT ──────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   initTabs();
+  enhanceBootstrapBindings();
+  initTheme();
   fetchEquations();
   fetchParameters();
   initGraphingTab();
 });
+
+// THEME: light/dark toggle with persistence
+function initTheme() {
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+
+  const saved = localStorage.getItem('mbe_theme');
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initial = saved || (prefersDark ? 'dark' : 'light');
+  applyTheme(initial);
+
+  btn.addEventListener('click', () => {
+    const current = document.documentElement.classList.contains('light-theme') ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    applyTheme(next);
+    localStorage.setItem('mbe_theme', next);
+  });
+}
+
+function applyTheme(name) {
+  if (name === 'light') {
+    document.documentElement.classList.add('light-theme');
+    document.documentElement.setAttribute('data-theme', 'light');
+    const btn = document.getElementById('theme-toggle'); if (btn) btn.textContent = '☀️';
+  } else {
+    document.documentElement.classList.remove('light-theme');
+    document.documentElement.setAttribute('data-theme', 'dark');
+    const btn = document.getElementById('theme-toggle'); if (btn) btn.textContent = '🌙';
+  }
+}
+
+// Apply Bootstrap helper classes to existing elements for a quicker visual upgrade
+function enhanceBootstrapBindings() {
+  // Buttons: ensure Bootstrap's base `btn` class is present
+  document.querySelectorAll('.btn-primary, .btn-secondary, .btn-sm, .btn').forEach(el => {
+    if (!el.classList.contains('btn')) el.classList.add('btn');
+  });
+
+  // Make primary buttons larger for better touch targets
+  document.querySelectorAll('.btn-primary').forEach(el => {
+    if (!el.classList.contains('btn-primary')) el.classList.add('btn-primary');
+  });
+
+  // Inputs: add form-control where appropriate
+  document.querySelectorAll('.cell-input, .txt-input, input[type="text"]').forEach(el => {
+    if (!el.classList.contains('form-control')) el.classList.add('form-control');
+  });
+
+  // Selects
+  document.querySelectorAll('.solve-select, select').forEach(el => {
+    if (!el.classList.contains('form-select')) el.classList.add('form-select');
+  });
+
+  // Small utilities: make the header content constrained
+  document.querySelectorAll('.header-inner').forEach(el => el.classList.add('container-lg'));
+}
 
 // ════════════════════════════════════════════════════════════════════
 // TABS
