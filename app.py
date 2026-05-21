@@ -95,7 +95,7 @@ PARAMETERS = [
     ("pi",   "initial reservoir pressure",                                      "psia"),
     ("p",    "current reservoir pressure",                                      "psia"),
     ("DDI",  "depletion-drive index",                                           "fraction"),
-    ("SDI",  "segregation-drive index",                                         "fraction"),
+    ("SDI",  "segregation-drive index",                                         "percentage"),
     ("WDI",  "water-drive index",                                               "fraction"),
     ("EDI",  "expansion-drive index",                                           "fraction"),
     ("RF",   "Recovery Factor",                                                 "fraction"),
