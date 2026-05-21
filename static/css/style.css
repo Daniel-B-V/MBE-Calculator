@@ -276,55 +276,69 @@ html, body {
   margin-bottom: 18px;
 }
 .math-formula {
-  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px;
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  flex-wrap: wrap; 
+  gap: 10px;
+  width: 100%;
   font-family: "Times New Roman", Georgia, serif;
   color: var(--text);
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.4;
 }
 .math-formula-preview {
   font-size: 11px;
   color: var(--subtext);
   gap: 8px;
-  justify-content: flex-start;
+  justify-content: center;
+  width: 100%;
 }
 .math-lhs {
   font-style: italic;
-  font-size: 1.25em;
+  font-size: 1.3em;
   letter-spacing: 0.01em;
   white-space: nowrap;
 }
 .math-equals {
-  font-size: 1.15em;
-  padding: 0 2px;
+  font-size: 1.2em;
+  padding: 0 4px;
 }
 .math-rhs {
   font-style: italic;
-  font-size: 1.08em;
+  font-size: 1.1em;
   white-space: normal;
 }
 .math-frac {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  min-width: 120px;
+  justify-content: center;
+  min-width: 140px;
   max-width: 100%;
   font-style: italic;
+  margin: 0 4px;
 }
 .math-num, .math-den {
   display: block;
-  padding: 0 6px;
+  padding: 0 8px;
   white-space: normal;
-  line-height: 1.15;
+  line-height: 1.2;
   text-align: center;
 }
-.math-num { padding-bottom: 4px; }
-.math-den { padding-top: 4px; }
+.math-num { 
+  padding-bottom: 6px; 
+  font-size: 1em;
+}
+.math-den { 
+  padding-top: 6px; 
+  font-size: 1em;
+}
 .math-bar {
   width: 100%;
-  height: 1.5px;
+  height: 2px;
   background: currentColor;
-  opacity: 0.8;
+  opacity: 0.85;
   border-radius: 999px;
 }
 
@@ -588,6 +602,41 @@ html, body {
 .btn-remove-column:hover {
   background: color-mix(in srgb, var(--red) 15%, transparent);
   transform: scale(1.1);
+}
+
+.btn-remove-row {
+  background: transparent;
+  border: none;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.btn-remove-row:hover {
+  background: color-mix(in srgb, var(--red) 15%, transparent);
+  transform: scale(1.1);
+}
+
+.btn-add-row {
+  background: linear-gradient(180deg, var(--accent2), color-mix(in srgb, var(--accent2) 80%, black 15%));
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 6px;
+  transition: all 0.15s;
+}
+
+.btn-add-row:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 .operation-select {

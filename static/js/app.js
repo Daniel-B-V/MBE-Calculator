@@ -473,6 +473,16 @@ function removeYColumn(columnId) {
   renderYColumns();
 }
 
+function addRowToColumn(column) {
+  column.values.push(0);
+}
+
+function removeRowFromColumn(column, rowIndex) {
+  if (column.values.length > 1) {
+    column.values.splice(rowIndex, 1);
+  }
+}
+
 function renderXColumns() {
   const container = document.getElementById("x-columns-container");
   if (!container) return;
@@ -649,10 +659,33 @@ function updateColumnInputs(column, container) {
       column.values[i] = val;
     });
     
+    // Remove row button (only show if more than 1 row exists)
+    const removeRowBtn = document.createElement("button");
+    removeRowBtn.className = "btn-remove-row";
+    removeRowBtn.innerHTML = "✕";
+    removeRowBtn.title = "Remove row";
+    removeRowBtn.addEventListener("click", () => {
+      removeRowFromColumn(column, i);
+      updateColumnInputs(column, container);
+    });
+    
     row.appendChild(label);
     row.appendChild(input);
+    if (column.values.length > 1) {
+      row.appendChild(removeRowBtn);
+    }
     container.appendChild(row);
   }
+  
+  // Add Row button
+  const addRowBtn = document.createElement("button");
+  addRowBtn.className = "btn-add-row";
+  addRowBtn.innerHTML = "+ Add Row";
+  addRowBtn.addEventListener("click", () => {
+    addRowToColumn(column);
+    updateColumnInputs(column, container);
+  });
+  container.appendChild(addRowBtn);
 }
 
 function getComputedValues() {

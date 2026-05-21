@@ -30,7 +30,7 @@ EQUATIONS = {
     "3b. Recovery Index – SDI": {
         "vars": ["SDI","N","m","Bti","Bg","Bgi","A"],
         "expr": {"SDI": "N*m*Bti*(Bg/Bgi - 1) / A"},
-        "formula_display": "SDI = N·m·Bti(Bg/Bgi - 1) / A",
+        "formula_display": "SDI = [ N·m·Bti(Bg/Bgi - 1) ] / [ A ]",
         "solve_for": "SDI",
     },
     "3c. Recovery Index – WDI": {
@@ -42,7 +42,7 @@ EQUATIONS = {
     "3d. Recovery Index – EDI": {
         "vars": ["EDI","N","Boi","m","cw","Swi","cf","pi","p","A"],
         "expr": {"EDI": "N*Boi*(1+m)*((cw*Swi + cf)/(1-Swi))*(pi - p) / A"},
-        "formula_display": "EDI = N·Boi(1+m)[(cw·Swi+cf)/(1-Swi)](pi-p) / A",
+        "formula_display": "EDI = [ N·Boi(1+m)[(cw·Swi+cf)/(1-Swi)](pi-p) ] / [ A ]",
         "solve_for": "EDI",
     },
     "3e. Parameter A": {
@@ -60,7 +60,7 @@ EQUATIONS = {
     "5. Free Gas Saturation (Sg)": {
         "vars": ["Sg","Np","N","Bo","Boi","Swc"],
         "expr": {"Sg": "1 - (1 - Np/N)*(Bo/Boi)*(1 - Swc)"},
-        "formula_display": "Sg = 1 - (1 - Np/N)(Bo/Boi)(1 - Swc)",
+        "formula_display": "Sg = 1 - (1 - Np÷N)·(Bo÷Boi)·(1 - Swc)",
         "solve_for": "Sg",
     },
 }
