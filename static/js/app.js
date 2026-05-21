@@ -152,12 +152,30 @@ function renderEqCards() {
     const parenMatch = String(name).match(/\(([^)]+)\)\s*$/);
 
     const card = el("button", { className: "eq-card" });
+    // inner container for 3D flip
+    const inner = el('div', { className: 'card-inner' });
+
+    // front face
+    const front = el('div', { className: 'card-front' });
     const middle = el("div", { className: "card-center" });
     middle.appendChild(el("div", { className: "card-symbol", textContent: sym }));
-    // display name without numeric prefix (e.g. "1.")
     middle.appendChild(el("div", { className: "card-name", textContent: stripNumberPrefix(name) }));
     if (desc) middle.appendChild(el("div", { className: "card-desc", textContent: desc }));
-    card.appendChild(middle);
+    front.appendChild(middle);
+
+    // back face (formula)
+    const back = el('div', { className: 'card-back' });
+    const pre = el('pre', { className: 'formula-preview', textContent: eq.formula_display || '' });
+    back.appendChild(pre);
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    card.appendChild(inner);
+
+    // Info icon (top-right) to flip the card and show formula
+    const infoBtn = el('button', { className: 'card-info', innerHTML: '<i class="fa fa-info-circle" aria-hidden="true"></i>' });
+    infoBtn.addEventListener('click', e => { e.stopPropagation(); card.classList.toggle('flipped'); });
+    card.appendChild(infoBtn);
 
     card.addEventListener("click", () => {
       loadEquation(name);

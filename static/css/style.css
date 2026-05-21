@@ -199,6 +199,7 @@ html, body {
   padding: 22px 20px; border: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
   cursor: pointer; text-align: center; box-shadow: 0 10px 26px rgba(9,12,24,0.06);
   min-height: 140px; transition: transform .12s ease, box-shadow .12s ease;
+  position: relative;
 }
 .eq-card:hover { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(6,10,24,0.10); }
 .card-center { display:flex; flex-direction:column; align-items:center; gap:8px; }
@@ -207,6 +208,23 @@ html, body {
 .card-right .card-name { margin-bottom: 4px; }
 .card-name { font-weight: 800; color: var(--text); font-size: 15px; margin: 0; }
 .card-desc { font-size: 12px; color: var(--subtext); margin-top: 6px; }
+
+/* Info icon in top-right of cards */
+.card-info {
+  position: absolute; top: 8px; right: 10px; width: 30px; height: 30px;
+  border: none; background: transparent; color: var(--subtext); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; border-radius: 6px;
+}
+.card-info:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); color: var(--accent); }
+.card-info i { font-size: 14px; }
+
+/* 3D flip styles */
+.card-inner { width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 450ms ease; position: relative; }
+.card-front, .card-back { backface-visibility: hidden; position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; padding: 18px; }
+.card-front { transform: rotateY(0deg); }
+.card-back { transform: rotateY(180deg); background: color-mix(in srgb, var(--surface) 92%, transparent); border-radius: 10px; }
+.eq-card.flipped .card-inner { transform: rotateY(180deg); }
+.formula-preview { font-family: var(--font-mono); font-size: 12px; color: var(--subtext); white-space: pre-wrap; max-height: 220px; overflow: auto; }
 
 /* Back button spacing */
 .back-wrap { margin-bottom: 14px; }
