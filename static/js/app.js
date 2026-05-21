@@ -165,8 +165,7 @@ function renderEqCards() {
 
     // back face (formula)
     const back = el('div', { className: 'card-back' });
-    const pre = el('pre', { className: 'formula-preview', textContent: eq.formula_display || '' });
-    back.appendChild(pre);
+    back.appendChild(renderFormula(eq.formula_display || '', true));
 
     inner.appendChild(front);
     inner.appendChild(back);
@@ -192,6 +191,43 @@ function stripNumberPrefix(name) {
   return String(name).replace(/^\s*\d+[A-Za-z]*\.\s*/, '');
 }
 
+function renderFormula(formula, isPreview = false) {
+  const wrapper = el('div', { className: isPreview ? 'formula-preview math-formula math-formula-preview' : 'formula-text math-formula' });
+  const text = String(formula || '').trim();
+  if (!text) {
+    wrapper.textContent = '';
+    return wrapper;
+  }
+
+  const parts = text.split('=');
+  if (parts.length < 2) {
+    wrapper.textContent = text;
+    return wrapper;
+  }
+
+  const lhs = parts.shift().trim();
+  const rhs = parts.join('=').trim();
+  wrapper.appendChild(el('span', { className: 'math-lhs', textContent: lhs }));
+  wrapper.appendChild(el('span', { className: 'math-equals', textContent: '=' }));
+
+  const bracketFrac = rhs.match(/^\[(.*)\]\s*\/\s*\[(.*)\]$/);
+  const slashIndex = rhs.indexOf('/');
+  const numerator = bracketFrac ? bracketFrac[1].trim() : (slashIndex > -1 ? rhs.slice(0, slashIndex).trim() : null);
+  const denominator = bracketFrac ? bracketFrac[2].trim() : (slashIndex > -1 ? rhs.slice(slashIndex + 1).trim() : null);
+
+  if (numerator !== null && denominator !== null) {
+    const frac = el('span', { className: 'math-frac' });
+    frac.appendChild(el('span', { className: 'math-num', textContent: numerator }));
+    frac.appendChild(el('span', { className: 'math-bar' }));
+    frac.appendChild(el('span', { className: 'math-den', textContent: denominator }));
+    wrapper.appendChild(frac);
+    return wrapper;
+  }
+
+  wrapper.appendChild(el('span', { className: 'math-rhs', textContent: rhs }));
+  return wrapper;
+}
+
 function loadEquation(name) {
   state.currentEq = name;
   const eq   = state.equations[name];
@@ -204,17 +240,17 @@ function loadEquation(name) {
   backWrap.appendChild(backBtn);
   main.appendChild(backWrap);
 
-  // Title (without numeric prefix)
-  const title = el("h2", { className: "eq-title fade-up" }, stripNumberPrefix(name));
-  main.appendChild(title);
-
-  // Formula card
-  const fc = el("div", { className: "formula-card fade-up" });
-  fc.appendChild(el("pre", { className: "formula-text", textContent: eq.formula_display }));
-  main.appendChild(fc);
+  // Screen area for equation name and formula
+  const screen = el("div", { className: "calc-screen fade-up" });
+  const title = el("h2", { className: "eq-title" }, stripNumberPrefix(name));
+  const fc = el("div", { className: "formula-card calc-formula" });
+  fc.appendChild(renderFormula(eq.formula_display));
+  screen.appendChild(title);
+  screen.appendChild(fc);
+  main.appendChild(screen);
 
   // Solve-for row
-  const sr = el("div", { className: "solve-row fade-up" });
+  const sr = el("div", { className: "solve-row calc-strip fade-up" });
   sr.appendChild(el("label", { textContent: "Solve for:" }));
   const sel = el("select", { className: "solve-select", id: "solve-select" });
   eq.vars.forEach(v => {
@@ -226,17 +262,17 @@ function loadEquation(name) {
   main.appendChild(sr);
 
   // Input grid
-  const grid = el("div", { className: "input-grid fade-up", id: "input-grid" });
+  const grid = el("div", { className: "input-grid calc-keypad fade-up", id: "input-grid" });
   eq.vars.forEach(v => grid.appendChild(makeInputCell(v)));
   main.appendChild(grid);
 
   // Result card
-  const rc = el("div", { className: "result-card fade-up" });
+  const rc = el("div", { className: "result-card calc-result fade-up" });
   rc.appendChild(el("div", { className: "result-text", id: "result-text", textContent: "Result will appear here" }));
   main.appendChild(rc);
 
   // Actions
-  const actions = el("div", { className: "calc-actions fade-up" });
+  const actions = el("div", { className: "calc-actions calc-actions-row fade-up" });
   const calcBtn = el("button", { className: "btn-primary", textContent: "Calculate  ▶" });
   calcBtn.addEventListener("click", () => runCalculation(name, eq));
   const resetBtn = el("button", { className: "btn-secondary", textContent: "Reset" });

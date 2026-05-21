@@ -242,7 +242,7 @@ html, body {
 .calc-layout { display: block; }
 .calc-main {
   width: 100%; height: 100%; overflow: auto; padding: 24px 40px;
-  background: var(--bg);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 70%, black 18%), var(--bg));
   display: flex; flex-direction: column;
 }
 .placeholder-msg {
@@ -254,22 +254,83 @@ html, body {
 
 /* Equation header */
 .eq-title {
-  font-size: 20px; font-weight: 800; color: var(--accent);
-  margin-bottom: 4px; letter-spacing: -0.2px;
+  font-size: 19px; font-weight: 800; color: var(--text);
+  margin: 0; letter-spacing: -0.2px;
+}
+.calc-screen {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 82%, black 14%), color-mix(in srgb, var(--card) 88%, black 10%));
+  border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 18px 38px rgba(3,6,16,.18);
+}
+.calc-formula {
+  margin-top: 10px;
+  margin-bottom: 0;
+  background: rgba(255,255,255,0.02);
 }
 .formula-card {
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 14px 18px;
   margin-bottom: 18px;
 }
-.formula-text {
-  font-family: var(--font-mono); font-size: 11px; color: var(--yellow);
-  white-space: pre-wrap; word-break: break-word; line-height: 1.7;
+.math-formula {
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px;
+  font-family: "Times New Roman", Georgia, serif;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+}
+.math-formula-preview {
+  font-size: 11px;
+  color: var(--subtext);
+  gap: 8px;
+  justify-content: flex-start;
+}
+.math-lhs {
+  font-style: italic;
+  font-size: 1.25em;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.math-equals {
+  font-size: 1.15em;
+  padding: 0 2px;
+}
+.math-rhs {
+  font-style: italic;
+  font-size: 1.08em;
+  white-space: normal;
+}
+.math-frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+  max-width: 100%;
+  font-style: italic;
+}
+.math-num, .math-den {
+  display: block;
+  padding: 0 6px;
+  white-space: normal;
+  line-height: 1.15;
+  text-align: center;
+}
+.math-num { padding-bottom: 4px; }
+.math-den { padding-top: 4px; }
+.math-bar {
+  width: 100%;
+  height: 1.5px;
+  background: currentColor;
+  opacity: 0.8;
+  border-radius: 999px;
 }
 
 /* Solve-for row */
 .solve-row {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
 }
 .solve-row label { font-size: 13px; font-weight: 600; color: var(--text); }
 .solve-select {
@@ -284,14 +345,16 @@ html, body {
 /* Input grid */
 .input-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px; margin-bottom: 20px;
+  gap: 12px; margin-bottom: 20px;
 }
 .input-cell {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 12px 14px;
-  transition: border-color .15s;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card2) 92%, white 2%), color-mix(in srgb, var(--card) 88%, black 6%));
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  border-radius: 16px; padding: 12px 14px;
+  transition: transform .12s ease, border-color .15s, box-shadow .15s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 6px 16px rgba(0,0,0,.10);
 }
-.input-cell:focus-within { border-color: var(--accent); }
+.input-cell:focus-within { border-color: var(--accent); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 10px 20px rgba(0,0,0,.14); }
 .cell-symbol {
   font-family: var(--font-mono); font-size: 13px; font-weight: 700;
   color: var(--accent2); margin-bottom: 2px;
@@ -312,10 +375,11 @@ html, body {
 
 /* Result */
 .result-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 16px 20px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card2) 90%, white 2%), color-mix(in srgb, var(--card) 88%, black 6%)); border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  border-radius: 16px; padding: 16px 20px;
   margin-bottom: 14px; min-height: 60px;
   display: flex; align-items: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 6px 16px rgba(0,0,0,.10);
 }
 .result-text {
   font-family: var(--font-mono); font-size: 18px; font-weight: 700;
@@ -326,21 +390,23 @@ html, body {
 /* Buttons */
 .btn-primary {
   font-family: var(--font-ui); font-size: 13px; font-weight: 700;
-  background: var(--accent); color: #fff;
-  border: none; border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 70%, black 18%)); color: #fff;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, black 10%); border-radius: 16px;
   padding: 12px 28px; cursor: pointer;
-  transition: background .15s, transform .1s;
+  transition: background .15s, transform .1s, box-shadow .15s;
+  box-shadow: 0 10px 18px rgba(0,0,0,.12);
 }
-.btn-primary:hover   { background: #3a6fd8; }
+.btn-primary:hover   { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, white 4%), color-mix(in srgb, var(--accent) 72%, black 20%)); }
 .btn-primary:active  { transform: scale(.97); }
 .btn-primary.full-width { width: 100%; padding: 14px; }
 
 .btn-secondary {
   font-family: var(--font-ui); font-size: 12px; font-weight: 600;
-  background: var(--card); color: var(--subtext);
-  border: 1px solid var(--border); border-radius: var(--radius);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card2) 90%, white 2%), color-mix(in srgb, var(--card) 90%, black 6%)); color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent); border-radius: 14px;
   padding: 8px 18px; cursor: pointer;
   transition: all .15s;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
 }
 .btn-secondary:hover { color: var(--text); border-color: var(--subtext); }
 
