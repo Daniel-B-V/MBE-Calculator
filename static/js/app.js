@@ -868,24 +868,10 @@ async function plotGraph() {
     // Build annotation points for labels
     const pointData = xs.map((x, i) => ({ x, y: ys[i] }));
 
-    // Build column info for legend - show operations between columns
-    const xColumnsInfo = xColumns.map((col, idx) => {
-      if (idx === 0) return col.name;
-      const opSymbol = getOpSymbol(col.operation);
-      return `${opSymbol} ${col.name}`;
-    }).join(' ');
-    
-    const yColumnsInfo = yColumns.map((col, idx) => {
-      if (idx === 0) return col.name;
-      const opSymbol = getOpSymbol(col.operation);
-      return `${opSymbol} ${col.name}`;
-    }).join(' ');
-    
-    const operationSelect = document.getElementById("x-y-operation");
-    const operation = operationSelect ? operationSelect.value : 'add';
-    const xyOpSymbol = getOpSymbol(operation);
-    
-    const legendLabel = `y = (${xColumnsInfo || '0'}) ${xyOpSymbol} (${yColumnsInfo || '0'})`;
+    // Build legend label with just the data values
+    const firstX = xs[0] !== undefined ? formatNumber(xs[0]) : '0';
+    const firstY = ys[0] !== undefined ? formatNumber(ys[0]) : '0';
+    const legendLabel = `y = (${firstX}, ${firstY})`;
 
     state.chart.data.datasets = [
       {
