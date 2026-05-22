@@ -61,6 +61,8 @@ function applyTheme(name) {
     document.documentElement.setAttribute('data-theme', 'dark');
     const btn = document.getElementById('theme-toggle'); if (btn) btn.textContent = '🌙';
   }
+
+  applyChartTheme();
 }
 
 // Apply Bootstrap helper classes to existing elements for a quicker visual upgrade
@@ -439,6 +441,47 @@ function initGraphingTab() {
   initChart();
 }
 
+function getChartThemeColors() {
+  const styles = getComputedStyle(document.documentElement);
+  return {
+    text: styles.getPropertyValue('--text').trim() || '#e8eaf6',
+    subtext: styles.getPropertyValue('--subtext').trim() || '#8892b0',
+    border: styles.getPropertyValue('--border').trim() || '#252a42',
+    surface: styles.getPropertyValue('--surface').trim() || '#111422',
+    accent: styles.getPropertyValue('--accent').trim() || '#4f8ef7',
+    accent2: styles.getPropertyValue('--accent2').trim() || '#7c5cbf',
+  };
+}
+
+function applyChartTheme() {
+  if (!state.chart) return;
+
+  const colors = getChartThemeColors();
+  const legend = state.chart.options.plugins.legend;
+  const tooltip = state.chart.options.plugins.tooltip;
+  const xScale = state.chart.options.scales.x;
+  const yScale = state.chart.options.scales.y;
+
+  legend.labels.color = colors.subtext;
+  tooltip.backgroundColor = colors.surface;
+  tooltip.titleColor = colors.text;
+  tooltip.bodyColor = colors.text;
+
+  xScale.ticks.color = colors.subtext;
+  xScale.grid.color = colors.border;
+  xScale.title.color = colors.text;
+
+  yScale.ticks.color = colors.subtext;
+  yScale.grid.color = colors.border;
+  yScale.title.color = colors.text;
+
+  if (state.chart.options.plugins.title) {
+    state.chart.options.plugins.title.color = colors.text;
+  }
+
+  state.chart.update();
+}
+
 function addXColumn() {
   const columnId = nextColumnId++;
   const column = {
@@ -783,23 +826,39 @@ function initChart() {
       maintainAspectRatio: true,
       animation: { duration: 400 },
       plugins: {
-        legend: { display: true, labels: { color: "#8892b0", font: { family: "Space Mono", size: 11 } } },
-        tooltip: { backgroundColor: "#1e2338", titleColor: "#4f8ef7", bodyColor: "#e8eaf6" },
+        legend: { display: true, labels: { color: getChartThemeColors().subtext, font: { family: "Space Mono", size: 11 } } },
+        tooltip: {
+          backgroundColor: getChartThemeColors().surface,
+          titleColor: getChartThemeColors().text,
+          bodyColor: getChartThemeColors().text,
+          callbacks: {
+            title(items) {
+              if (!items.length) return "";
+              const point = items[0].raw || {};
+              return `(${formatNumber(point.x)}, ${formatNumber(point.y)})`;
+            },
+            label() {
+              return "";
+            },
+          },
+        },
       },
       scales: {
         x: {
-          ticks:  { color: "#8892b0", font: { family: "Space Mono", size: 10 } },
-          grid:   { color: "#252a42" },
-          title:  { display: true, color: "#e8eaf6", font: { family: "Syne", size: 12, weight: "700" } },
+          ticks:  { color: getChartThemeColors().subtext, font: { family: "Space Mono", size: 10 } },
+          grid:   { color: getChartThemeColors().border },
+          title:  { display: true, color: getChartThemeColors().text, font: { family: "Syne", size: 12, weight: "700" } },
         },
         y: {
-          ticks:  { color: "#8892b0", font: { family: "Space Mono", size: 10 } },
-          grid:   { color: "#252a42" },
-          title:  { display: true, color: "#e8eaf6", font: { family: "Syne", size: 12, weight: "700" } },
+          ticks:  { color: getChartThemeColors().subtext, font: { family: "Space Mono", size: 10 } },
+          grid:   { color: getChartThemeColors().border },
+          title:  { display: true, color: getChartThemeColors().text, font: { family: "Syne", size: 12, weight: "700" } },
         },
       },
     },
   });
+
+  applyChartTheme();
 }
 
 function getOpSymbol(operation) {
@@ -834,25 +893,22 @@ async function plotGraph() {
     const data = await res.json();
     if (data.error) { alert(data.error); return; }
 
-    // Update chart title
+    const chartColors = getChartThemeColors();
+
     state.chart.options.plugins.title = {
       display: true, text: title,
-      color: "#e8eaf6", font: { family: "Syne", size: 13, weight: "700" },
+      color: chartColors.text, font: { family: "Syne", size: 13, weight: "700" },
     };
     state.chart.options.scales.x.title.text = xLabel;
     state.chart.options.scales.y.title.text = yLabel;
+    applyChartTheme();
 
     // Build annotation points for labels
     const pointData = xs.map((x, i) => ({ x, y: ys[i] }));
 
-    // Build legend label with just the data values
-    const firstX = xs[0] !== undefined ? formatNumber(xs[0]) : '0';
-    const firstY = ys[0] !== undefined ? formatNumber(ys[0]) : '0';
-    const legendLabel = `y = (${firstX}, ${firstY})`;
-
     state.chart.data.datasets = [
       {
-        label: legendLabel,
+        label: "Plotted points",
         type: "scatter",
         data: pointData,
         backgroundColor: "#4f8ef7",

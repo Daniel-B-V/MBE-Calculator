@@ -86,8 +86,8 @@ PARAMETERS = [
     ("Winj", "cumulative water injected",                                       "STB"),
     ("cw",   "water compressibility coefficient",                               "psi⁻¹"),
     ("cf",   "Formation rock compressibility factor",                           "psi⁻¹"),
-    ("Swi",  "Initial water saturation",                                        "fraction"),
-    ("Swc",  "connate water saturation",                                        "fraction"),
+    ("Swi",  "Initial water saturation",                                        "percentage"),
+    ("Swc",  "connate water saturation",                                        "percentage"),
     ("Bt",   "two-phase formation volume factor",                               "bbl/STB"),
     ("Bti",  "two-phase FVF at initial conditions",                             "bbl/STB"),
     ("A",    "MBE parameter A = Np[Bt+(Rp-Rsi)Bg]",                            "bbl"),
@@ -96,10 +96,10 @@ PARAMETERS = [
     ("p",    "current reservoir pressure",                                      "psia"),
     ("DDI",  "depletion-drive index",                                           "fraction"),
     ("SDI",  "segregation-drive index",                                         "percentage"),
-    ("WDI",  "water-drive index",                                               "fraction"),
-    ("EDI",  "expansion-drive index",                                           "fraction"),
-    ("RF",   "Recovery Factor",                                                 "fraction"),
-    ("Sg",   "Free Gas Saturation",                                             "fraction"),
+    ("WDI",  "water-drive index",                                               "percentage"),
+    ("EDI",  "expansion-drive index",                                           "percentage"),
+    ("RF",   "Recovery Factor",                                                 "percentage"),
+    ("Sg",   "Free Gas Saturation",                                             "percentage"),
 ]
 
 
