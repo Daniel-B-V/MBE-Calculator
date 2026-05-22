@@ -55,11 +55,9 @@ function applyTheme(name) {
   if (name === 'light') {
     document.documentElement.classList.add('light-theme');
     document.documentElement.setAttribute('data-theme', 'light');
-    const btn = document.getElementById('theme-toggle'); if (btn) btn.textContent = '☀️';
   } else {
     document.documentElement.classList.remove('light-theme');
     document.documentElement.setAttribute('data-theme', 'dark');
-    const btn = document.getElementById('theme-toggle'); if (btn) btn.textContent = '🌙';
   }
 
   applyChartTheme();
@@ -98,11 +96,21 @@ function initTabs() {
   const btns   = document.querySelectorAll(".tab-btn");
   const panels = document.querySelectorAll(".tab-panel");
 
+  // no top indicator — active tab highlighted via CSS
+
   btns.forEach(btn => {
     btn.addEventListener("click", () => {
       const target = btn.dataset.tab;
       btns.forEach(b   => b.classList.toggle("active",   b === btn));
       panels.forEach(p => p.classList.toggle("active",   p.id === `tab-${target}`));
+      // Manage vertical-centering class on calculator main area.
+      // Only center when showing the calculator cards (no equation loaded).
+      const calcMain = document.getElementById('calc-main');
+      if (calcMain) {
+        if (target === 'calculator' && !state.currentEq) calcMain.classList.add('cards-centered');
+        else calcMain.classList.remove('cards-centered');
+      }
+      // active tab is highlighted via CSS
     });
   });
 }
@@ -144,14 +152,14 @@ function renderEqCards() {
   if (state.currentEq) return;
   // Clear any existing content and build grid
   main.innerHTML = "";
+  // ensure main is centered for the cards view only
+  main.classList.add('cards-centered');
   const grid = el("div", { className: "cards-grid" });
 
   Object.entries(state.equations).forEach(([name, eq]) => {
     const sym = eq.solve_for || (eq.vars && eq.vars[0]) || "?";
     const param = getParam(sym);
     const desc = param ? param.description : "";
-    // detect parenthetical symbol in the original name (e.g. "... (N)")
-    const parenMatch = String(name).match(/\(([^)]+)\)\s*$/);
 
     const card = el("button", { className: "eq-card" });
     // inner container for 3D flip
@@ -234,10 +242,12 @@ function loadEquation(name) {
   state.currentEq = name;
   const eq   = state.equations[name];
   const main = document.getElementById("calc-main");
+  // remove cards-centered so the inner equation view is not vertically centered
+  main.classList.remove('cards-centered');
   main.innerHTML = "";
   // Back button to return to the card grid
   const backWrap = el("div", { className: "back-wrap" });
-  const backBtn = el("button", { className: "btn-secondary back-btn", textContent: "← Back to equations" });
+  const backBtn = el("button", { className: "btn-secondary back-btn", textContent: "Back to equations" });
   backBtn.addEventListener("click", () => { state.currentEq = null; renderEqCards(); });
   backWrap.appendChild(backBtn);
   main.appendChild(backWrap);
@@ -250,6 +260,13 @@ function loadEquation(name) {
   screen.appendChild(title);
   screen.appendChild(fc);
   main.appendChild(screen);
+  // Result display placed below the formula box (outside the boxed screen)
+  const rc = el("div", { className: "result-card calc-result fade-up" });
+  rc.appendChild(el("div", { className: "result-text", id: "result-text", textContent: "Result will appear here" }));
+  // Wrap result + actions so buttons can sit to the right of the result
+  let resultWrap = el("div", { className: "result-wrap" });
+  resultWrap.appendChild(rc);
+  main.appendChild(resultWrap);
 
   // Solve-for row
   const sr = el("div", { className: "solve-row calc-strip fade-up" });
@@ -268,20 +285,18 @@ function loadEquation(name) {
   eq.vars.forEach(v => grid.appendChild(makeInputCell(v)));
   main.appendChild(grid);
 
-  // Result card
-  const rc = el("div", { className: "result-card calc-result fade-up" });
-  rc.appendChild(el("div", { className: "result-text", id: "result-text", textContent: "Result will appear here" }));
-  main.appendChild(rc);
+  // result card placed below the formula screen
 
   // Actions
   const actions = el("div", { className: "calc-actions calc-actions-row fade-up" });
-  const calcBtn = el("button", { className: "btn-primary", textContent: "Calculate  ▶" });
+  const calcBtn = el("button", { className: "btn-primary", textContent: "Calculate" });
   calcBtn.addEventListener("click", () => runCalculation(name, eq));
   const resetBtn = el("button", { className: "btn-secondary", textContent: "Reset" });
   resetBtn.addEventListener("click", () => resetInputs(eq));
   actions.appendChild(calcBtn);
   actions.appendChild(resetBtn);
-  main.appendChild(actions);
+  // append actions into the result wrapper so they appear to the right
+  if (resultWrap) resultWrap.appendChild(actions);
 }
 
 function makeInputCell(vname) {
@@ -337,7 +352,7 @@ async function runCalculation(name, eq) {
   });
 
   if (missing.length) {
-    rt.textContent = `⚠ Missing: ${missing.join(", ")}`;
+    rt.textContent = `Missing: ${missing.join(", ")}`;
     rt.className = "result-text error";
     return;
   }
@@ -353,7 +368,7 @@ async function runCalculation(name, eq) {
     });
     const data = await res.json();
     if (data.error) {
-      rt.textContent = `⚠ ${data.error}`;
+      rt.textContent = data.error;
       rt.className = "result-text error";
     } else {
       const formatted = formatNumber(data.result);
@@ -439,6 +454,40 @@ function initGraphingTab() {
   document.getElementById("btn-plot").addEventListener("click", plotGraph);
 
   initChart();
+
+  // Sidebar toggle: allow hiding/showing the controls panel
+  const btnToggle = document.getElementById('btn-toggle-sidebar');
+  const sidebar  = document.querySelector('.graph-sidebar');
+  const mainArea = document.querySelector('.graph-main');
+  const graphLayout = document.querySelector('.graph-layout');
+  if (btnToggle && sidebar && mainArea) {
+    const setCollapsed = (collapsed) => {
+      if (collapsed) {
+        sidebar.classList.add('collapsed');
+        sidebar.setAttribute('aria-expanded', 'false');
+        if (graphLayout) graphLayout.classList.add('sidebar-collapsed');
+        // update icon
+        btnToggle.innerHTML = '<i class="fa fa-chevron-right" aria-hidden="true"></i>';
+        btnToggle.style.left = '8px';
+      } else {
+        sidebar.classList.remove('collapsed');
+        sidebar.setAttribute('aria-expanded', 'true');
+        if (graphLayout) graphLayout.classList.remove('sidebar-collapsed');
+        btnToggle.innerHTML = '<i class="fa fa-chevron-left" aria-hidden="true"></i>';
+        btnToggle.style.left = `${(sidebar.offsetWidth || 320) + 8}px`;
+      }
+      try { localStorage.setItem('mbe_sidebar_collapsed', collapsed ? '1' : '0'); } catch (e) {}
+    };
+
+    // initial state from localStorage
+    const saved = (function(){ try { return localStorage.getItem('mbe_sidebar_collapsed'); } catch(e){ return null; } })();
+    setCollapsed(saved === '1');
+
+    btnToggle.addEventListener('click', () => {
+      const isCollapsed = sidebar.classList.contains('collapsed');
+      setCollapsed(!isCollapsed);
+    });
+  }
 }
 
 function getChartThemeColors() {
@@ -539,7 +588,7 @@ function renderXColumns() {
       
       const opLabel = document.createElement("div");
       opLabel.className = "op-label";
-      opLabel.textContent = "↓ Operation ↓";
+      opLabel.textContent = "Operation";
       
       const opSelect = document.createElement("select");
       opSelect.className = "column-operation-select";
@@ -549,10 +598,10 @@ function renderXColumns() {
       });
       
       [
-        { value: 'add', text: '➕ Add (+)' },
-        { value: 'subtract', text: '➖ Subtract (-)' },
-        { value: 'multiply', text: '✖ Multiply (×)' },
-        { value: 'divide', text: '➗ Divide (÷)' }
+        { value: 'add', text: 'Add (+)' },
+        { value: 'subtract', text: 'Subtract (-)' },
+        { value: 'multiply', text: 'Multiply (×)' },
+        { value: 'divide', text: 'Divide (÷)' }
       ].forEach(op => {
         const opt = document.createElement("option");
         opt.value = op.value;
@@ -584,7 +633,7 @@ function renderXColumns() {
     
     const removeBtn = document.createElement("button");
     removeBtn.className = "btn-remove-column";
-    removeBtn.innerHTML = "✕";
+    removeBtn.textContent = "Remove";
     removeBtn.addEventListener("click", () => removeXColumn(column.id));
     
     header.appendChild(nameInput);
@@ -615,7 +664,7 @@ function renderYColumns() {
       
       const opLabel = document.createElement("div");
       opLabel.className = "op-label";
-      opLabel.textContent = "↓ Operation ↓";
+      opLabel.textContent = "Operation";
       
       const opSelect = document.createElement("select");
       opSelect.className = "column-operation-select";
@@ -625,10 +674,10 @@ function renderYColumns() {
       });
       
       [
-        { value: 'add', text: '➕ Add (+)' },
-        { value: 'subtract', text: '➖ Subtract (-)' },
-        { value: 'multiply', text: '✖ Multiply (×)' },
-        { value: 'divide', text: '➗ Divide (÷)' }
+        { value: 'add', text: 'Add (+)' },
+        { value: 'subtract', text: 'Subtract (-)' },
+        { value: 'multiply', text: 'Multiply (×)' },
+        { value: 'divide', text: 'Divide (÷)' }
       ].forEach(op => {
         const opt = document.createElement("option");
         opt.value = op.value;
@@ -660,7 +709,7 @@ function renderYColumns() {
     
     const removeBtn = document.createElement("button");
     removeBtn.className = "btn-remove-column";
-    removeBtn.innerHTML = "✕";
+    removeBtn.textContent = "Remove";
     removeBtn.addEventListener("click", () => removeYColumn(column.id));
     
     header.appendChild(nameInput);
@@ -705,7 +754,7 @@ function updateColumnInputs(column, container) {
     // Remove row button (only show if more than 1 row exists)
     const removeRowBtn = document.createElement("button");
     removeRowBtn.className = "btn-remove-row";
-    removeRowBtn.innerHTML = "✕";
+    removeRowBtn.textContent = "Remove";
     removeRowBtn.title = "Remove row";
     removeRowBtn.addEventListener("click", () => {
       removeRowFromColumn(column, i);
@@ -959,7 +1008,7 @@ const tooltip = (() => {
     div.classList.add("visible");
   }
   function hide() { div.classList.remove("visible"); }
-  return { show, hide };
+  return { show, hide, _el: div };
 })();
 
 function attachTooltip(el, text) {
@@ -968,9 +1017,10 @@ function attachTooltip(el, text) {
   el.addEventListener("mouseleave", () => tooltip.hide());
 }
 
+let _cachedTippy = null;
 function div_pos(e) {
-  const div = document.querySelector(".tippy");
-  if (div) { div.style.left = `${e.clientX + 12}px`; div.style.top = `${e.clientY + 8}px`; }
+  if (!_cachedTippy) _cachedTippy = tooltip && tooltip._el ? tooltip._el : document.querySelector('.tippy');
+  if (_cachedTippy) { _cachedTippy.style.left = `${e.clientX + 12}px`; _cachedTippy.style.top = `${e.clientY + 8}px`; }
 }
 
 // ════════════════════════════════════════════════════════════════════

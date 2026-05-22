@@ -4,13 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MBE Calculator — Petroleum Engineering</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/css/style.css" />
-  <!-- Bootstrap (added for improved layout) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Optional icons -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -20,29 +14,23 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="header-brand">
-        <span class="brand-icon">⛽</span>
         <div>
           <h1 class="brand-title">MBE Calculator</h1>
         </div>
       </div>
+      <nav class="tab-bar" aria-label="Primary">
+        <button class="tab-btn active" data-tab="calculator">Calculator</button>
+        <button class="tab-btn" data-tab="graphing">Graphing</button>
+        <button class="tab-btn" data-tab="parameters">Parameters</button>
+      </nav>
       <div class="header-actions">
-        <label class="theme-switch" title="Toggle color theme">
+        <label class="theme-switch" title="Toggle color theme" aria-label="Toggle color theme">
           <input id="theme-toggle" type="checkbox" />
-          <span class="theme-slider">
-            <span class="theme-icon sun">☀️</span>
-            <span class="theme-icon moon">🌙</span>
-          </span>
+          <span class="theme-slider"></span>
         </label>
       </div>
     </div>
   </header>
-
-  <!-- ── TAB BAR ────────────────────────────────────────── -->
-  <nav class="tab-bar">
-    <button class="tab-btn active" data-tab="calculator">🧮 Calculator</button>
-    <button class="tab-btn"        data-tab="graphing">📈 Graphing</button>
-    <button class="tab-btn"        data-tab="parameters">📋 Parameters</button>
-  </nav>
 
   <!-- ═════════════════════════════════════════════════════=
        CALCULATOR TAB
@@ -54,7 +42,6 @@
       <!-- Main panel (cards shown here) -->
       <div class="calc-main" id="calc-main">
         <div class="placeholder-msg">
-          <span class="placeholder-arrow">←</span>
           Select an equation to begin
         </div>
       </div>
@@ -68,6 +55,9 @@
   -->
   <section class="tab-panel" id="tab-graphing">
     <div class="graph-layout">
+      <button id="btn-toggle-sidebar" class="btn-sm sidebar-toggle" aria-label="Toggle sidebar">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+      </button>
 
       <!-- Controls sidebar -->
       <aside class="graph-sidebar">
@@ -87,7 +77,7 @@
           </div>
           <div class="input-row">
             <label>Graph Title</label>
-            <input type="text" id="g-title" value="Oil &amp; Gas Material Balance – Linear Function" class="txt-input" />
+            <input type="text" id="g-title" value="Oil &amp; Gas Material Balance Linear Function" class="txt-input" />
           </div>
         </div>
 
@@ -95,17 +85,17 @@
         <div class="sidebar-block">
           <p class="sidebar-label">X-AXIS COLUMNS</p>
           <div id="x-columns-container" class="columns-container"></div>
-          <button id="btn-add-x-column" class="btn-sm accent2" style="margin-top: 8px;">+ Add X Column</button>
+          <button id="btn-add-x-column" class="btn-sm accent2" style="margin-top: 8px;">Add X Column</button>
         </div>
 
         <!-- Y-AXIS COLUMNS SECTION -->
         <div class="sidebar-block">
           <p class="sidebar-label">Y-AXIS COLUMNS</p>
           <div id="y-columns-container" class="columns-container"></div>
-          <button id="btn-add-y-column" class="btn-sm accent2" style="margin-top: 8px;">+ Add Y Column</button>
+          <button id="btn-add-y-column" class="btn-sm accent2" style="margin-top: 8px;">Add Y Column</button>
         </div>
 
-        <button id="btn-plot" class="btn-primary full-width">Plot Graph  📈</button>
+        <button id="btn-plot" class="btn-primary full-width">Plot Graph</button>
         <div id="slope-display" class="slope-display"></div>
       </aside>
 
@@ -126,7 +116,6 @@
       <div class="params-header">
         <h2>Parameters &amp; Units Reference</h2>
         <div class="search-box">
-          <span class="search-icon">🔍</span>
           <input type="text" id="param-search" placeholder="Search symbol, description, or unit…" class="txt-input" />
         </div>
       </div>
@@ -146,6 +135,5 @@
   </section>
 
   <script src="/static/js/app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
